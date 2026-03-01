@@ -1,0 +1,208 @@
+/* WorkerLoginScreen.css */
+/* Reusing the same premium layout tokens as Official Login */
+.login-root {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    padding: 20px;
+    background-color: #f6f6f8;
+    color: #1a1e2e;
+    font-family: 'Public Sans', sans-serif;
+    align-items: center;
+    overflow-y: auto;
+    padding-bottom: 60px;
+}
+
+.login-desktop {
+    justify-content: flex-start;
+    padding-top: 60px;
+    padding-bottom: 80px;
+}
+
+.login-header-nav {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.login-back-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #1a1e2e;
+    transition: background 0.2s;
+}
+
+.login-back-btn:hover {
+    background: #e2e8f0;
+}
+
+.login-branding {
+    text-align: center;
+    margin-bottom: 40px;
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-icon-box {
+    width: 64px;
+    height: 64px;
+    background: #1e3b8a1a;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    color: #1e3b8a;
+}
+
+.login-title {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #1a1e2e;
+}
+
+.login-subtitle {
+    font-size: 16px;
+    color: #64748b;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 400px;
+    background: white;
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.input-label-login {
+    font-size: 14px;
+    font-weight: 500;
+    color: #334155;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.input-field-login {
+    width: 100%;
+    height: 56px;
+    padding: 0 16px;
+    border-radius: 8px;
+    border: 1.5px solid #e2e8f0;
+    background: #f6f6f8;
+    font-size: 15px;
+    color: #1a1e2e;
+    transition: all 0.2s;
+}
+
+.input-field-login:focus {
+    outline: none;
+    border-color: #1e3b8a;
+    box-shadow: 0 0 0 2px rgba(30, 59, 138, 0.1);
+}
+
+.password-input-wrap {
+    position: relative;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    cursor: pointer;
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+}
+
+.forgot-password-link {
+    display: block;
+    text-align: right;
+    margin-top: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1e3b8a;
+    text-decoration: none;
+}
+
+.login-submit-btn {
+    width: 100%;
+    height: 56px;
+    border-radius: 12px;
+    background: #1e3b8a;
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 10px 15px -3px rgba(30, 59, 138, 0.2);
+    margin-top: 8px;
+}
+
+.login-footer-actions {
+    margin-top: 40px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+}
+
+.official-login-btn {
+    width: 100%;
+    height: 56px;
+    border-radius: 12px;
+    background: transparent;
+    color: #1e3b8a;
+    font-size: 16px;
+    font-weight: 600;
+    border: 2px solid #1e3b8a;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.official-login-btn:hover {
+    background: #1e3b8a11;
+}
+
+.home-indicator-login {
+    width: 128px;
+    height: 6px;
+    background: #cbd5e1;
+    border-radius: 99px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+@media (min-width: 1024px) {
+
+    .login-desktop .login-header-nav,
+    .login-desktop .login-branding,
+    .login-desktop .login-card,
+    .login-desktop .login-footer-actions {
+        max-width: 500px;
+    }
+}

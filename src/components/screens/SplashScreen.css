@@ -1,0 +1,244 @@
+/* ── SplashScreen.css ────────────────────────────────────────────────── */
+
+/* Root container — fills whatever host frame gives it */
+.splash-root {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8fafc;
+    overflow: hidden;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* ── Radial glow ── */
+.splash-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -60%);
+    width: 400px;
+    height: 400px;
+    border-radius: 9999px;
+    background: radial-gradient(circle, rgba(30, 59, 138, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+    animation: splashGlowPulse 3s ease-in-out infinite;
+}
+
+@keyframes splashGlowPulse {
+
+    0%,
+    100% {
+        opacity: 0.6;
+        transform: translate(-50%, -60%) scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: translate(-50%, -60%) scale(1.15);
+    }
+}
+
+/* ── Decorative grid lines (desktop) ── */
+.splash-grid {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: space-around;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.splash-grid-line {
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent, rgba(30, 59, 138, 0.06) 40%, rgba(30, 59, 138, 0.06) 60%, transparent);
+    animation: splashGridFade 2s ease-out both;
+    animation-delay: var(--delay, 0s);
+}
+
+@keyframes splashGridFade {
+    from {
+        opacity: 0;
+        transform: scaleY(0);
+    }
+
+    to {
+        opacity: 1;
+        transform: scaleY(1);
+    }
+}
+
+/* ── Main content block ── */
+.splash-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    animation: splashFadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes splashFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Icon wrapper ── */
+.splash-icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    animation: splashIconPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
+}
+
+@keyframes splashIconPop {
+    from {
+        opacity: 0;
+        transform: scale(0.6);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.splash-icon-lg {
+    width: 80px;
+    height: 80px;
+}
+
+.splash-icon-sm {
+    width: 60px;
+    height: 60px;
+}
+
+.splash-icon {
+    color: #1e3b8a;
+    line-height: 1;
+    /* font-size set below per variant */
+}
+
+.splash-icon-lg .splash-icon {
+    font-size: 72px;
+}
+
+.splash-icon-sm .splash-icon {
+    font-size: 54px;
+}
+
+/* ── Title ── */
+.splash-title {
+    font-weight: 600;
+    color: #1e3b8a;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin: 0;
+}
+
+.splash-title-lg {
+    font-size: 2rem;
+}
+
+.splash-title-sm {
+    font-size: 1.5rem;
+}
+
+/* ── Tagline ── */
+.splash-tagline {
+    font-weight: 400;
+    color: #6b7280;
+    margin-top: 8px;
+}
+
+.splash-tagline-lg {
+    font-size: 0.9rem;
+}
+
+.splash-tagline-sm {
+    font-size: 0.8rem;
+}
+
+/* ── Progress ── */
+.splash-progress-wrap {
+    margin-top: 40px;
+}
+
+.splash-progress-lg {
+    width: 140px;
+}
+
+.splash-progress-sm {
+    width: 100px;
+}
+
+.splash-progress-track {
+    height: 4px;
+    border-radius: 9999px;
+    background: rgba(30, 59, 138, 0.12);
+    overflow: hidden;
+}
+
+.splash-progress-fill {
+    height: 100%;
+    width: 40%;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, #1e3b8a 0%, #2a52c9 100%);
+    animation: splashProgressGrow 1.8s cubic-bezier(0.4, 0, 0.2, 1) 0.4s both;
+}
+
+@keyframes splashProgressGrow {
+    from {
+        width: 0%;
+        opacity: 0;
+    }
+
+    to {
+        width: 40%;
+        opacity: 1;
+    }
+}
+
+/* ── Footer ── */
+.splash-footer {
+    position: absolute;
+    bottom: 28px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    animation: splashFadeUp 0.7s ease-out 0.5s both;
+}
+
+.splash-footer-text {
+    font-size: 0.625rem;
+    /* 10px */
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(107, 114, 128, 0.55);
+}
+
+/* ── Variant shims (mobile-specific overrides) ── */
+
+.splash-mobile .splash-glow {
+    width: 260px;
+    height: 260px;
+}
+
+.splash-mobile .splash-footer {
+    bottom: 20px;
+}

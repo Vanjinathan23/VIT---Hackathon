@@ -1,0 +1,424 @@
+/* ProfileScreen.css - Redesigned Civic Profile Layout */
+
+.profile-root {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: #f8fafc;
+    /* Matches the clean white/blue tint */
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, sans-serif;
+}
+
+/* 1. Header */
+.profile-header-new {
+    height: 64px;
+    background-color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.header-title-new {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a2e4c;
+}
+
+.back-btn-top,
+.edit-btn-top {
+    background: transparent;
+    border: none;
+    color: #475569;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.back-btn-top:hover,
+.edit-btn-top:hover {
+    background-color: #f1f5f9;
+}
+
+/* 2. Scroll Area */
+.profile-scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 20px 100px 20px;
+    /* Space for central nav */
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+/* 3. User Info Section */
+.user-info-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.avatar-wrapper {
+    position: relative;
+    width: 110px;
+    height: 110px;
+    margin-bottom: 24px; /* Increased from 16px to prevent sticking to name */
+}
+
+.main-avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.verified-badge-mini {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 24px;
+    height: 24px;
+    background-color: #3b82f6;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #ffffff;
+}
+
+.user-name-text {
+    font-size: 24px;
+    font-weight: 900;
+    color: #1a2e4c;
+    margin: 0 0 8px 0;
+}
+
+.badge-verified-citizen {
+    padding: 6px 16px;
+    border: 1px solid #3b82f6;
+    border-radius: 20px;
+    color: #3b82f6;
+    font-size: 12px;
+    font-weight: 700;
+    background-color: #eff6ff;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}
+
+.user-meta-text {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0;
+}
+
+/* 4. Stats Grid */
+.stats-grid-new {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.stat-card-new {
+    background-color: #ffffff;
+    padding: 16px 8px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.stat-num {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+
+.color-blue {
+    color: #2563eb;
+}
+
+.color-green {
+    color: #10b981;
+}
+
+.color-orange {
+    color: #f59e0b;
+}
+
+.stat-label-new {
+    font-size: 10px;
+    font-weight: 700;
+    color: #94a3b8;
+    line-height: 1.2;
+}
+
+/* 5. Section Headers */
+.section-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: #1a2e4c;
+    margin: 0;
+}
+
+.view-all-link {
+    background: transparent;
+    border: none;
+    color: #2563eb;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* 6. Activity Cards */
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.activity-item-card {
+    background-color: #ffffff;
+    padding: 16px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    cursor: pointer;
+}
+
+.activity-icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.activity-icon-box .material-symbols-outlined {
+    font-size: 24px;
+}
+
+.activity-icon-box.pending {
+    background-color: #eff6ff;
+    color: #2563eb;
+}
+
+.activity-icon-box.processing {
+    background-color: #fef3c7;
+    color: #d97706;
+}
+
+.activity-icon-box.verified {
+    background-color: #ecfdf5;
+    color: #059669;
+}
+
+.activity-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.item-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a2e4c;
+}
+
+.item-location {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-top: 2px;
+}
+
+.activity-status-date {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.status-tag-mini {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 9px;
+    font-weight: 800;
+}
+
+.status-tag-mini.pending {
+    background-color: #fee2e2;
+    color: #ef4444;
+}
+
+/* Reported */
+.status-tag-mini.processing {
+    background-color: #ffedd5;
+    color: #ea580c;
+}
+
+/* In Progress */
+.status-tag-mini.verified {
+    background-color: #dcfce7;
+    color: #16a34a;
+}
+
+/* Resolved */
+
+.item-date {
+    font-size: 11px;
+    color: #cbd5e1;
+}
+
+/* 7. Settings Menu */
+.settings-menu-list {
+    background-color: #ffffff;
+    border-radius: 20px;
+    padding: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.settings-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid #f8fafc;
+    cursor: pointer;
+}
+
+.settings-item-row:last-child {
+    border-bottom: none;
+}
+
+.settings-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.settings-left span:first-child {
+    color: #64748b;
+}
+
+.settings-left span:last-child {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a2e4c;
+}
+
+.logout-text span {
+    color: #ef4444 !important;
+}
+
+.arrow {
+    color: #cbd5e1;
+    font-size: 20px;
+}
+
+/* 8. Bottom Nav Centralized */
+.mobile-nav-central {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100px; /* Increased from 90px */
+    background-color: #ffffff;
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    padding-bottom: 20px; /* Increased from 12px for better clearance */
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.05);
+    z-index: 100;
+}
+
+.nav-item-new {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px; /* Increased gap between icon and label */
+    width: 60px;
+    color: #94a3b8;
+    cursor: pointer;
+}
+
+.nav-item-new.active-new {
+    color: #3b82f6;
+}
+
+.nav-label {
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.nav-center-plus {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    top: -24px;
+    /* Floating look */
+    width: 70px;
+    color: #3b82f6;
+    cursor: pointer;
+}
+
+.plus-btn-inner {
+    width: 56px;
+    height: 56px;
+    background-color: #3b82f6;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+    margin-bottom: 4px;
+}
+
+.nav-label-center {
+    font-size: 11px;
+    font-weight: 700;
+    position: relative;
+    top: 4px;
+}
+
+/* 9. Desktop Scaling */
+.profile-root--desktop {
+    background-color: #f1f5f9;
+}
+
+.profile-root--desktop .profile-header-new,
+.profile-root--desktop .profile-scroll-area {
+    max-width: 600px;
+    margin: 0 auto;
+    width: 100%;
+    background-color: white;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.03);
+}
+
+.profile-root--desktop .stats-grid-new {
+    gap: 24px;
+}

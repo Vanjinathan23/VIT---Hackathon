@@ -1,0 +1,523 @@
+/* TaskSessionScreen.css */
+.ts-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--background, #f8fafc);
+    color: var(--text-primary, #1e293b);
+    overflow-y: auto;
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE/Edge */
+    animation: fadeIn 0.3s ease-out;
+}
+
+.ts-container::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari, Opera */
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Header */
+.ts-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.ts-header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.ts-header-title-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: nowrap;
+}
+
+.ts-back-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.ts-back-btn:hover {
+    background-color: #f1f5f9;
+    color: #1e293b;
+}
+
+.ts-task-id {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.ts-priority-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.ts-priority-badge.emergency {
+    background-color: #fee2e2;
+    color: #ef4444;
+}
+
+.ts-priority-badge.high-priority {
+    background-color: #fff7ed;
+    color: #f97316;
+}
+
+.ts-priority-badge.medium {
+    background-color: #eff6ff;
+    color: #3b82f6;
+}
+
+.ts-priority-badge.low {
+    background-color: #f1f5f9;
+    color: #64748b;
+}
+
+.ts-header-right {
+    display: flex;
+    align-items: center;
+}
+
+.ts-sla-timer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.ts-sla-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.ts-sla-value {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+
+.ts-sla-value.danger {
+    color: #ef4444;
+}
+
+.ts-sla-value.warning {
+    color: #f59e0b;
+}
+
+.ts-sla-value .material-symbols-outlined {
+    font-size: 1.25rem;
+}
+
+/* Layout - Desktop Split */
+.ts-layout {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.ts-main-details {
+    flex: 7;
+    /* 70% roughly */
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.ts-main-details.full-width {
+    flex: 1;
+}
+
+.ts-sidebar {
+    flex: 3;
+    /* 30% roughly */
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Detail Card */
+.ts-detail-card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    border: 1px solid #e2e8f0;
+}
+
+.ts-top-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.ts-category {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #3b82f6;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.ts-category .material-symbols-outlined {
+    font-size: 1.25rem;
+}
+
+.ts-date {
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.ts-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+
+.ts-reporter-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #475569;
+    font-size: 0.875rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.ts-reporter-info .material-symbols-outlined {
+    color: #94a3b8;
+}
+
+.ts-description h3,
+.ts-image-container h3,
+.ts-location h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: #1e293b;
+}
+
+.ts-description p {
+    color: #475569;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.ts-image-container {
+    margin-top: 2rem;
+}
+
+.ts-reported-img {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.ts-location {
+    margin-top: 2rem;
+}
+
+.ts-location-card {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    background-color: #f8fafc;
+}
+
+.ts-map-preview img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    display: block;
+}
+
+.ts-address-bar {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem;
+}
+
+.ts-address-bar .material-symbols-outlined {
+    color: #ef4444;
+}
+
+.ts-address-bar p {
+    margin: 0;
+    font-size: 0.9375rem;
+    color: #334155;
+    font-weight: 500;
+}
+
+/* Sidebar Panels */
+.ts-status-panel,
+.ts-action-panel {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+}
+
+.ts-status-panel h3,
+.ts-action-panel h3 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: #1e293b;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 0.75rem;
+}
+
+/* Status Flow Steps */
+.ts-status-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.ts-step {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+.ts-step.active {
+    color: #3b82f6;
+    font-weight: 600;
+}
+
+.ts-step-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+}
+
+.ts-step.active .ts-step-icon {
+    background-color: #eff6ff;
+    color: #3b82f6;
+}
+
+.ts-step-line {
+    width: 2px;
+    height: 20px;
+    background-color: #e2e8f0;
+    margin-left: 13px;
+}
+
+.ts-step-line.active {
+    background-color: #3b82f6;
+}
+
+/* Actions */
+.ts-action-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.ts-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    margin-bottom: 0.75rem;
+}
+
+.ts-btn .material-symbols-outlined {
+    font-size: 1.25rem;
+}
+
+.ts-start-btn {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.ts-start-btn:hover {
+    background-color: #2563eb;
+}
+
+.ts-complete-btn {
+    background-color: #10b981;
+    color: white;
+}
+
+.ts-complete-btn:hover {
+    background-color: #059669;
+}
+
+.ts-notes-btn,
+.ts-upload-btn,
+.ts-escalate-btn {
+    background-color: #f1f5f9;
+    color: #475569;
+}
+
+.ts-notes-btn:hover,
+.ts-upload-btn:hover {
+    background-color: #e2e8f0;
+    color: #1e293b;
+}
+
+.ts-escalate-wrapper {
+    margin-top: 2rem;
+    border-top: 1px dashed #cbd5e1;
+    padding-top: 1rem;
+}
+
+.ts-escalate-btn {
+    width: 100%;
+    background-color: #fff1f2;
+    color: #ef4444;
+    margin-bottom: 0;
+}
+
+.ts-escalate-btn:hover {
+    background-color: #fee2e2;
+}
+
+.ts-success-msg {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #10b981;
+    font-weight: 600;
+    padding: 1rem;
+    background-color: #ecfdf5;
+    border-radius: 12px;
+    justify-content: center;
+}
+
+/* Responsive Mobile view overrides */
+@media (max-width: 992px) {
+    .ts-layout {
+        flex-direction: column;
+        padding: 1rem;
+        gap: 1rem;
+    }
+
+    .ts-main-details,
+    .ts-sidebar {
+        flex: 1 1 auto;
+    }
+
+    .ts-header {
+        padding: 0.75rem 1rem;
+    }
+
+    .ts-header-title-group {
+        gap: 0.5rem;
+    }
+
+    .ts-back-btn {
+        padding: 0.25rem;
+    }
+
+    .ts-task-id {
+        font-size: 1.125rem;
+    }
+
+    .ts-header-title-group {
+        gap: 0.5rem;
+    }
+
+    .ts-detail-card {
+        padding: 1.25rem;
+    }
+
+    .ts-title {
+        font-size: 1.25rem;
+    }
+}
+
+.ts-container.mobile .ts-layout {
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1rem;
+}
+
+.ts-container.mobile .ts-main-details,
+.ts-container.mobile .ts-sidebar {
+    flex: 1 1 auto;
+}
+
+.ts-container.mobile .ts-header {
+    padding: 1rem;
+}
+
+.ts-container.mobile .ts-task-id {
+    font-size: 1.125rem;
+}
+
+.ts-container.mobile .ts-detail-card {
+    padding: 1.25rem;
+}
+
+.ts-container.mobile .ts-title {
+    font-size: 1.25rem;
+}

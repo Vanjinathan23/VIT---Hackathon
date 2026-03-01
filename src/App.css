@@ -1,0 +1,156 @@
+/* ── Reset ────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: #0f172a;
+  /* NOTE: overflow intentionally NOT hidden here — DualViewLayout
+     uses position:fixed + 100vw/100vh to own its own scroll context */
+  height: 100vh;
+}
+
+
+
+/* ── LEFT — Desktop pane (70%) ────────────────────────────────── */
+.desktop-pane {
+  flex: 0 0 70%;
+  height: 100%;
+  background: #F8FAFC;
+  overflow-y: auto;
+  /* inner scroll if needed */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* ── RIGHT — Mobile pane (30%) ────────────────────────────────── */
+.mobile-pane {
+  flex: 0 0 30%;
+  height: 100%;
+  background: #0f172a;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px 16px;
+}
+
+/* ── Placeholder helper ───────────────────────────────────────── */
+.pane-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  user-select: none;
+}
+
+.pane-label {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #475569;
+  letter-spacing: -0.01em;
+}
+
+.pane-sub {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+/* override label color inside phone */
+.phone-screen .pane-label {
+  color: #334155;
+}
+
+.phone-screen .pane-sub {
+  color: #94a3b8;
+}
+
+/* ── Phone Frame ──────────────────────────────────────────────── */
+.phone-outer {
+  position: relative;
+  width: 100%;
+  max-width: 375px;
+  /* Dynamic height that fills most of the pane */
+  height: min(780px, calc(100vh - 80px));
+  background: #1e293b;
+  border-radius: 48px;
+  padding: 14px;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 30px 80px rgba(0, 0, 0, 0.6),
+    inset 0 0 0 2px #0f172a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Notch / Dynamic Island */
+.phone-notch {
+  width: 36%;
+  height: 28px;
+  background: #0f172a;
+  border-radius: 0 0 24px 24px;
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+}
+
+/* Scrollable screen inside phone */
+.phone-screen {
+  flex: 1;
+  width: 100%;
+  background: #ffffff;
+  border-radius: 38px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px;
+  /* subtle inner border */
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+/* Home indicator pill */
+.phone-home-bar {
+  width: 38%;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 99px;
+  margin-top: 10px;
+  flex-shrink: 0;
+}
+
+/* ── Scrollbar styling (desktop pane inner) ───────────────────── */
+.desktop-pane::-webkit-scrollbar,
+.phone-screen::-webkit-scrollbar {
+  width: 4px;
+}
+
+.desktop-pane::-webkit-scrollbar-track,
+.phone-screen::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.desktop-pane::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 99px;
+}
+
+.phone-screen::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 99px;
+}
