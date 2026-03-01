@@ -1,33 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import useAppStore from '../../store/useAppStore';
+import useNotificationStore from '../../store/useNotificationStore';
 import './OfficialDashboardScreen.css';
 import { TaskListView, UnifiedIssueDetailsModal } from './OfficialViews';
 
 const OfficialDashboardScreen = ({ variant = 'mobile' }) => {
     const isMobile = variant === 'mobile';
+    const isDesktop = !isMobile;
     const logout = useAppStore(state => state.logout);
     const user = useAppStore(state => state.currentUser);
-    const workerTasks = useAppStore(state => state.workerTasks);
+    const issues = useAppStore(state => state.issues);            // ← shared complaints from DB
+    const fetchAppData = useAppStore(state => state.fetchAppData);
 
     // Core Navigation State
     const [activeTab, setActiveTab] = useState('Control');
     const [currentView, setCurrentView] = useState('dashboard');
     const [selectedTaskId, setSelectedTaskId] = useState(null);
     const [selectedWorkerProfile, setSelectedWorkerProfile] = useState(null);
+    const unreadCount = useNotificationStore(state => state.unreadCount);
+    const navigate = useAppStore(state => state.navigate);
+
+    // Load complaints from DB on mount
+    useEffect(() => {
+        fetchAppData();
+    }, []);
+
+    // ── Derived Metrics (from shared issues array) ───────────────────────────
+    const total = issues.length;
+    const pending = issues.filter(t => t.status === 'pending').length;
+    const inProgress = issues.filter(t => t.status === 'in_progress').length;
+    const completed = issues.filter(t => t.status === 'completed').length;
+    const verified = issues.filter(t => t.status === 'verified').length;
+    const escalations = issues.filter(t => t.escalation_flag);
 
     const metrics = [
-        { label: 'Total', value: workerTasks.length.toString(), type: 'total' },
-        { label: 'Pending', value: workerTasks.filter(t => t.status === 'Pending Assignment').length.toString(), type: 'new' },
-        { label: 'In Progress', value: workerTasks.filter(t => t.status === 'In Progress').length.toString(), type: 'pending' }
+        { label: 'Total', value: total.toString(), type: 'total' },
+        { label: 'Pending', value: pending.toString(), type: 'new' },
+        { label: 'In Progress', value: inProgress.toString(), type: 'pending' }
     ];
-
-    const escalations = workerTasks.filter(t => t.isEscalated);
 
     const feedItems = [
-        { role: 'Worker', action: 'completed Task #CS-1024', time: '15 minutes ago', location: 'Sector 4', icon: 'group', id: '#CS-1024' }
-    ];
-
-    const isDesktop = !isMobile;
+        { role: 'Worker', action: 'completed a task', time: '15 minutes ago', location: 'Sector 4', icon: 'group', id: issues[0]?.id }
+    ].filter(f => f.id);
 
     const renderNavItems = () => (
         <>
@@ -66,15 +80,19 @@ const OfficialDashboardScreen = ({ variant = 'mobile' }) => {
                         <p className="od-role">COMMAND CENTER</p>
                     </div>
                 </div>
-
-                <button className="od-status" title="Notifications / Logout" onClick={logout}>
-                    <span className="material-symbols-outlined od-status-icon">notifications</span>
-                    <img src={user?.profileImage || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} alt="Profile" className="od-profile-avatar" />
-                </button>
+                <div style={{ display: 'flex', gap: '16px' }}>
+                    <button className="od-status" title="Notifications" onClick={() => navigate('notifications')} style={{ position: 'relative' }}>
+                        <span className="material-symbols-outlined od-status-icon">notifications</span>
+                        {unreadCount > 0 && <span className="unread-badge-wd" style={{ top: 8, right: 8 }}>{unreadCount}</span>}
+                    </button>
+                    <button className="od-status" title="Logout" onClick={logout}>
+                        <img src={user?.profileImage || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} alt="Profile" className="od-profile-avatar" />
+                    </button>
+                </div>
             </header>
 
             <main>
-                {/* Metrics */}
+                {/* Real-Time Metrics */}
                 <section className="od-section">
                     <h2 className="od-section-title">
                         <span className="material-symbols-outlined od-section-icon">analytics</span>
@@ -95,7 +113,7 @@ const OfficialDashboardScreen = ({ variant = 'mobile' }) => {
                     </div>
                 </section>
 
-                {/* Quick Navigation Buttons overlay layout */}
+                {/* Quick Navigation */}
                 <section className="od-section">
                     <h2 className="od-section-title" style={{ marginBottom: 16 }}>Quick Navigation</h2>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
@@ -103,44 +121,44 @@ const OfficialDashboardScreen = ({ variant = 'mobile' }) => {
                             <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>list_alt</span> Master Registry
                         </button>
                         <button className="od-btn danger" style={{ background: '#fee2e2', color: '#dc2626', fontSize: '13px', padding: '12px' }} onClick={() => setCurrentView('escalated')}>
-                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>warning</span> Escalated Issues
+                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>warning</span> Escalated ({escalations.length})
                         </button>
                         <button className="od-btn outline" style={{ background: '#ffedd5', color: '#ea580c', fontSize: '13px', padding: '12px' }} onClick={() => setCurrentView('pending_assignment')}>
-                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>assignment_late</span> Pending Assignment
+                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>assignment_late</span> Pending ({pending})
                         </button>
                         <button className="od-btn primary" style={{ background: '#eff6ff', color: '#3b82f6', fontSize: '13px', padding: '12px' }} onClick={() => setCurrentView('assigned')}>
                             <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>assignment_ind</span> Assigned Monitor
                         </button>
                         <button className="od-btn primary" style={{ background: '#dbeafe', color: '#1d4ed8', fontSize: '13px', padding: '12px' }} onClick={() => setCurrentView('in_progress')}>
-                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>engineering</span> In Progress Monitor
+                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>engineering</span> In Progress ({inProgress})
                         </button>
                         <button className="od-btn outline" style={{ background: '#ecfdf5', color: '#059669', fontSize: '13px', padding: '12px' }} onClick={() => setCurrentView('completed')}>
-                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>fact_check</span> Completed Verify
+                            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>fact_check</span> Verify ({completed})
                         </button>
                     </div>
                 </section>
 
-                {/* Worker Load Monitoring Summary */}
+                {/* Worker Load */}
                 <section className="od-section" style={{ marginTop: '12px' }}>
                     <div className="od-stats-row">
-                        <div className="od-stat cur-pointer" onClick={() => setSelectedWorkerProfile('Ravi S.')} style={{ cursor: 'pointer' }}>
+                        <div className="od-stat" style={{ cursor: 'pointer' }} onClick={() => setSelectedWorkerProfile('Ravi S.')}>
                             <span className="material-symbols-outlined od-stat-icon">group</span>
                             <div className="od-stat-content">
                                 <div className="od-stat-title">Active Workers</div>
-                                <div className="od-stat-value">2 / 3</div>
+                                <div className="od-stat-value">2 / 2</div>
                             </div>
                         </div>
-                        <div className="od-stat danger cur-pointer" onClick={() => setSelectedWorkerProfile('Sarah')} style={{ cursor: 'pointer' }}>
+                        <div className="od-stat danger" style={{ cursor: 'pointer' }}>
                             <span className="material-symbols-outlined od-stat-icon">warning</span>
                             <div className="od-stat-content">
-                                <div className="od-stat-title">Overloaded</div>
-                                <div className="od-stat-value">1 (Sarah)</div>
+                                <div className="od-stat-title">Escalated Issues</div>
+                                <div className="od-stat-value">{escalations.length}</div>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                {/* Escalated Issues & Feed */}
+                {/* Escalated Issues & Activity Feed */}
                 <section className="od-section" style={{ paddingBottom: '24px' }}>
                     <div className="od-tasks-header">
                         <h2 className="od-tasks-title">Escalated Issues & Feed</h2>
@@ -150,15 +168,17 @@ const OfficialDashboardScreen = ({ variant = 'mobile' }) => {
                         </button>
                     </div>
                     <div className="od-task-list">
-                        {escalations.length === 0 && <p style={{ color: '#64748b' }}>No escalated issues.</p>}
+                        {escalations.length === 0 && (
+                            <p style={{ color: '#64748b', fontSize: '14px' }}>No escalated issues.</p>
+                        )}
                         {escalations.map((esc, i) => (
                             <div key={i} className="od-task active">
                                 <div className="od-task-top">
-                                    <span className="od-tag red">URGENT</span>
+                                    <span className="od-tag red">ESCALATED</span>
                                     <div className="od-sla">
                                         <div className="od-sla-time red">
                                             <span className="material-symbols-outlined">warning</span>
-                                            Escalated
+                                            Urgent
                                         </div>
                                     </div>
                                 </div>
@@ -167,7 +187,7 @@ const OfficialDashboardScreen = ({ variant = 'mobile' }) => {
                                     <span className="material-symbols-outlined od-category-icon">report_problem</span>
                                     {esc.category}
                                 </div>
-                                <p className="od-desc">{esc.description}</p>
+                                <p className="od-desc">{esc.title}</p>
                                 <div className="od-loc">
                                     <span className="material-symbols-outlined">location_on</span>
                                     <span>{esc.location}</span>
@@ -182,13 +202,11 @@ const OfficialDashboardScreen = ({ variant = 'mobile' }) => {
                         ))}
 
                         {feedItems.map((item, i) => (
-                            <div key={`feed-${i}`} className="od-task active" onClick={() => setSelectedTaskId(item.id)} style={{ cursor: 'pointer' }}>
+                            <div key={`feed-${i}`} className="od-task active" onClick={() => item.id && setSelectedTaskId(item.id)} style={{ cursor: 'pointer' }}>
                                 <div className="od-task-top">
                                     <span className="od-tag blue">FEED UPDATE</span>
                                     <div className="od-sla">
-                                        <div className="od-sla-time gray">
-                                            {item.time}
-                                        </div>
+                                        <div className="od-sla-time gray">{item.time}</div>
                                     </div>
                                 </div>
                                 <h2 className="od-task-id">{item.role} {item.action}</h2>
@@ -257,33 +275,75 @@ const OfficialDashboardScreen = ({ variant = 'mobile' }) => {
         <div className={`official-dashboard-container ${isDesktop ? 'official-dashboard-desktop' : ''}`}>
 
             {selectedWorkerProfile && renderWorkerProfileModal()}
-            {selectedTaskId && <UnifiedIssueDetailsModal taskId={selectedTaskId} onClose={() => setSelectedTaskId(null)} />}
+
+            {selectedTaskId && (
+                <UnifiedIssueDetailsModal
+                    taskId={selectedTaskId}
+                    onClose={() => setSelectedTaskId(null)}
+                />
+            )}
 
             {!selectedWorkerProfile && !selectedTaskId && currentView === 'dashboard' && renderDashboard()}
 
+            {/* ── Monitoring Views (filter from shared issues array) ─── */}
             {!selectedWorkerProfile && !selectedTaskId && currentView === 'master_registry' && (
-                <TaskListView title="Master Registry (All)" filterFn={() => true} onOpenTask={setSelectedTaskId} onBack={() => setCurrentView('dashboard')} />
+                <TaskListView
+                    title="Master Registry (All)"
+                    filterFn={() => true}
+                    onOpenTask={setSelectedTaskId}
+                    onBack={() => setCurrentView('dashboard')}
+                />
             )}
             {!selectedWorkerProfile && !selectedTaskId && currentView === 'pending_assignment' && (
-                <TaskListView title="Pending Assignment" filterFn={t => t.status === 'Pending Assignment'} onOpenTask={setSelectedTaskId} onBack={() => setCurrentView('dashboard')} />
+                <TaskListView
+                    title="Pending Assignment"
+                    filterFn={t => t.status === 'pending'}
+                    onOpenTask={setSelectedTaskId}
+                    onBack={() => setCurrentView('dashboard')}
+                />
             )}
             {!selectedWorkerProfile && !selectedTaskId && currentView === 'assigned' && (
-                <TaskListView title="Assigned Monitoring" filterFn={t => t.status === 'Assigned'} onOpenTask={setSelectedTaskId} onBack={() => setCurrentView('dashboard')} />
+                <TaskListView
+                    title="Assigned Monitoring"
+                    filterFn={t => t.status === 'assigned'}
+                    onOpenTask={setSelectedTaskId}
+                    onBack={() => setCurrentView('dashboard')}
+                />
             )}
             {!selectedWorkerProfile && !selectedTaskId && currentView === 'in_progress' && (
-                <TaskListView title="In Progress Tasks" filterFn={t => t.status === 'In Progress'} onOpenTask={setSelectedTaskId} onBack={() => setCurrentView('dashboard')} />
+                <TaskListView
+                    title="In Progress Tasks"
+                    filterFn={t => t.status === 'in_progress'}
+                    onOpenTask={setSelectedTaskId}
+                    onBack={() => setCurrentView('dashboard')}
+                />
             )}
             {!selectedWorkerProfile && !selectedTaskId && currentView === 'completed' && (
-                <TaskListView title="Completed Verification" filterFn={t => t.status === 'Completed'} onOpenTask={setSelectedTaskId} onBack={() => setCurrentView('dashboard')} />
+                <TaskListView
+                    title="Completed — Verification"
+                    filterFn={t => t.status === 'completed'}
+                    onOpenTask={setSelectedTaskId}
+                    onBack={() => setCurrentView('dashboard')}
+                />
             )}
             {!selectedWorkerProfile && !selectedTaskId && currentView === 'verified' && (
-                <TaskListView title="Verified & Closed" filterFn={t => t.status === 'Verified'} onOpenTask={setSelectedTaskId} onBack={() => setCurrentView('dashboard')} />
+                <TaskListView
+                    title="Verified & Closed"
+                    filterFn={t => t.status === 'verified'}
+                    onOpenTask={setSelectedTaskId}
+                    onBack={() => setCurrentView('dashboard')}
+                />
             )}
             {!selectedWorkerProfile && !selectedTaskId && currentView === 'escalated' && (
-                <TaskListView title="Escalated Issues" filterFn={t => t.isEscalated} onOpenTask={setSelectedTaskId} onBack={() => setCurrentView('dashboard')} />
+                <TaskListView
+                    title="Escalated Issues"
+                    filterFn={t => t.escalation_flag === true}
+                    onOpenTask={setSelectedTaskId}
+                    onBack={() => setCurrentView('dashboard')}
+                />
             )}
 
-            {/* Bottom Nav on Mobile, Sidebar on Desktop */}
+            {/* Bottom Nav (mobile) / Sidebar (desktop) */}
             <nav className={`od-bottom-nav ${isMobile ? 'od-bottom-nav-mobile' : ''}`}>
                 {renderNavItems()}
             </nav>

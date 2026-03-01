@@ -2,7 +2,9 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    height: 100%;
+    /* Fill parent frame */
+    overflow-y: auto;
     background-color: #f8fafc;
     font-family: inherit;
 }

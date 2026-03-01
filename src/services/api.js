@@ -1,125 +1,176 @@
-export const api = {
-    login: async (email, password) => {
-        return new Promise(resolve => {
-            setTimeout(() => {
-                let role = 'citizen';
-                if (email.includes('worker')) role = 'worker';
-                else if (email.includes('official') || email.includes('admin')) role = 'official';
+// src/services/api.js
+// All operations target the shared complaints table via the Express server.
+// No mock stubs for workflow operations – only real HTTP calls.
 
-                resolve({
-                    success: true,
-                    id: `user_${Date.now()}`,
-                    role,
-                    name: email.split('@')[0] || 'User'
-                });
-            }, 500);
+const BASE = '/api';
+
+async function safeFetch(url, options = {}) {
+    try {
+        const res = await fetch(url, {
+            headers: { 'Content-Type': 'application/json' },
+            ...options
         });
-    },
-
-    fetchAssignedTasks: async (useAppStore) => {
-        return new Promise(resolve => {
-            setTimeout(() => {
-                resolve(useAppStore.getState().workerTasks || []);
-            }, 100);
-        });
-    },
-
-    fetchOfficialComplaints: async (useAppStore) => {
-        return new Promise(resolve => {
-            setTimeout(() => {
-                resolve(useAppStore.getState().issues || []);
-            }, 100);
-        });
-    },
-
-    fetchCitizenComplaints: async (useAppStore) => {
-        try {
-            const res = await fetch('/api/citizen/complaints');
-            if (res.ok) {
-                return await res.json();
-            }
-        } catch (e) {
-            console.error(e);
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({ error: res.statusText }));
+            console.error(`API Error [${res.status}] ${url}:`, err);
+            return null;
         }
-        return useAppStore.getState().issues || [];
+        return await res.json();
+    } catch (e) {
+        console.error(`Network error on ${url}:`, e);
+        return null;
+    }
+}
+
+export const api = {
+    // ── AUTH ──────────────────────────────────────────────────────────────────
+    login: async (email, password) => {
+        // Determine role from email keyword (mock auth — no real auth server)
+        let role = 'citizen';
+        if (email.includes('worker')) role = 'worker';
+        else if (email.includes('official') || email.includes('admin')) role = 'official';
+
+        // Map to a real seeded user
+        const roleUserMap = {
+            citizen: 'user_123',
+            worker: 'worker_01',
+            official: 'off_01'
+        };
+
+        return {
+            success: true,
+            id: roleUserMap[role],
+            role,
+            name: email.split('@')[0] || 'User'
+        };
     },
 
-    startTask: async (id, useAppStore) => {
-        return new Promise(resolve => {
-            setTimeout(() => {
-                const state = useAppStore.getState();
-                if (state.updateWorkerTask) {
-                    state.updateWorkerTask(id, { status: 'In Progress' });
-                }
-                resolve({ success: true });
-            }, 500);
-        });
+    // ── CITIZEN ───────────────────────────────────────────────────────────────
+    fetchCitizenComplaints: async () => {
+        const data = await safeFetch(`${BASE}/citizen/complaints`);
+        return data || [];
     },
 
-    completeTask: async (id, reason, useAppStore) => {
-        return new Promise(resolve => {
-            setTimeout(() => {
-                const state = useAppStore.getState();
-                if (state.updateWorkerTask) {
-                    state.updateWorkerTask(id, { status: 'Completed', resolution: reason });
-                }
-                resolve({ success: true });
-            }, 500);
-        });
+    fetchMyCitizenComplaints: async (citizen_id) => {
+        const data = await safeFetch(`${BASE}/citizen/my-complaints?citizen_id=${encodeURIComponent(citizen_id)}`);
+        return data || [];
     },
 
-    assignTask: async (taskId, workerId, useAppStore) => {
-        return new Promise(resolve => {
-            setTimeout(() => {
-                // Mock assignment
-                resolve({ success: true });
-            }, 500);
-        });
-    },
-
-    verifyTask: async (taskId, useAppStore) => {
-        return new Promise(resolve => {
-            setTimeout(() => resolve({ success: true }), 500);
-        });
-    },
-
-    rejectTask: async (taskId, useAppStore) => {
-        return new Promise(resolve => {
-            setTimeout(() => resolve({ success: true }), 500);
-        });
-    },
-
-    escalateTask: async (taskId, reason, useAppStore) => {
-        return new Promise(resolve => {
-            setTimeout(() => resolve({ success: true }), 500);
+    createComplaint: async ({ citizen_id, title, category, description, location, image_url, coordinates, priority }) => {
+        return await safeFetch(`${BASE}/citizen/create`, {
+            method: 'POST',
+            body: JSON.stringify({ citizen_id, title, category, description, location, image_url, coordinates, priority })
         });
     },
 
     fetchCitizenAccounts: async () => {
-        try {
-            const res = await fetch('/api/citizen/accounts');
-            if (res.ok) {
-                return await res.json();
-            }
-        } catch (e) {
-            console.error(e);
-        }
-        return [];
+        const data = await safeFetch(`${BASE}/citizen/accounts`);
+        return data || [];
     },
 
-    switchAccount: async (accountId, useAppStore) => {
-        try {
-            const res = await fetch('/api/citizen/switch-account', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ accountId })
-            });
-            if (res.ok) {
-                return await res.json();
-            }
-        } catch (e) {
-            console.error(e);
-        }
-        return { success: false };
+    switchAccount: async (accountId) => {
+        const data = await safeFetch(`${BASE}/citizen/switch-account`, {
+            method: 'POST',
+            body: JSON.stringify({ accountId })
+        });
+        return data || { success: false };
+    },
+
+    // ── OFFICIAL ──────────────────────────────────────────────────────────────
+    fetchOfficialAll: async () => {
+        const data = await safeFetch(`${BASE}/official/all`);
+        return data || [];
+    },
+
+    fetchOfficialByStatus: async (status) => {
+        const data = await safeFetch(`${BASE}/official/by-status?status=${status}`);
+        return data || [];
+    },
+
+    fetchOfficialEscalated: async () => {
+        const data = await safeFetch(`${BASE}/official/escalated`);
+        return data || [];
+    },
+
+    assignTask: async (complaint_id, worker_id, official_id, priority) => {
+        return await safeFetch(`${BASE}/official/assign`, {
+            method: 'POST',
+            body: JSON.stringify({ complaint_id, worker_id, official_id, priority })
+        });
+    },
+
+    verifyTask: async (complaint_id, official_id) => {
+        return await safeFetch(`${BASE}/official/verify`, {
+            method: 'POST',
+            body: JSON.stringify({ complaint_id, official_id })
+        });
+    },
+
+    rejectTask: async (complaint_id, official_id, reason) => {
+        return await safeFetch(`${BASE}/official/reject`, {
+            method: 'POST',
+            body: JSON.stringify({ complaint_id, official_id, reason })
+        });
+    },
+
+    escalateTask: async (complaint_id, official_id, reason) => {
+        return await safeFetch(`${BASE}/official/escalate`, {
+            method: 'POST',
+            body: JSON.stringify({ complaint_id, official_id, reason })
+        });
+    },
+
+    // ── WORKER ────────────────────────────────────────────────────────────────
+    fetchWorkerTasks: async (worker_id) => {
+        const data = await safeFetch(`${BASE}/worker/my-tasks?worker_id=${encodeURIComponent(worker_id)}`);
+        return data || [];
+    },
+
+    fetchWorkerCompletedTasks: async (worker_id) => {
+        const data = await safeFetch(`${BASE}/worker/completed-tasks?worker_id=${encodeURIComponent(worker_id)}`);
+        return data || [];
+    },
+
+    startTask: async (complaint_id, worker_id) => {
+        return await safeFetch(`${BASE}/worker/start`, {
+            method: 'POST',
+            body: JSON.stringify({ complaint_id, worker_id })
+        });
+    },
+
+    completeTask: async (complaint_id, worker_id, notes) => {
+        return await safeFetch(`${BASE}/worker/complete`, {
+            method: 'POST',
+            body: JSON.stringify({ complaint_id, worker_id, notes })
+        });
+    },
+
+    fetchWorkerAccounts: async () => {
+        const data = await safeFetch(`${BASE}/worker/accounts`);
+        return data || [];
+    },
+
+    // ── NOTIFICATIONS ─────────────────────────────────────────────────────────
+    fetchNotifications: async (user_id) => {
+        const data = await safeFetch(`${BASE}/notifications?user_id=${encodeURIComponent(user_id)}`);
+        return data || [];
+    },
+
+    markNotificationRead: async (id) => {
+        return await safeFetch(`${BASE}/notifications/${id}/read`, {
+            method: 'PATCH',
+        });
+    },
+
+    markAllNotificationsRead: async (user_id) => {
+        return await safeFetch(`${BASE}/notifications/read-all`, {
+            method: 'PATCH',
+            body: JSON.stringify({ user_id })
+        });
+    },
+
+    fetchUnreadNotificationCount: async (user_id) => {
+        const data = await safeFetch(`${BASE}/notifications/unread-count?user_id=${encodeURIComponent(user_id)}`);
+        return data ? data.count : 0;
     }
 };

@@ -52,11 +52,15 @@ const IssueFullDetailsScreen = ({ variant = 'mobile' }) => {
     };
 
     const getStatusStyle = (status) => {
-        switch (status) {
-            case 'Pending': return { bg: '#fef3c7', text: '#d97706' };
-            case 'Processing': return { bg: '#dbeafe', text: '#2563eb' };
-            case 'Verified': return { bg: '#dcfce7', text: '#16a34a' };
-            default: return { bg: '#f3f4f6', text: '#374151' };
+        const s = (status || '').toLowerCase();
+        switch (s) {
+            case 'pending': return { bg: '#fef3c7', text: '#d97706', label: 'Pending' };
+            case 'assigned':
+            case 'in_progress':
+            case 'processing': return { bg: '#dbeafe', text: '#2563eb', label: 'In Progress' };
+            case 'completed':
+            case 'verified': return { bg: '#dcfce7', text: '#16a34a', label: 'Verified' };
+            default: return { bg: '#f3f4f6', text: '#374151', label: 'Unknown' };
         }
     };
 
@@ -96,9 +100,9 @@ const IssueFullDetailsScreen = ({ variant = 'mobile' }) => {
                 {/* 2. Issue Info Card */}
                 <section className="info-card">
                     <div className="badge-row">
-                        <span className="category-pill">{issue.category.toUpperCase()}</span>
+                        <span className="category-pill">{(issue.category || 'General').toUpperCase()}</span>
                         <span className="status-pill" style={{ backgroundColor: statusStyle.bg, color: statusStyle.text }}>
-                            {issue.status}
+                            {statusStyle.label || issue.status}
                         </span>
                     </div>
                     <h2 className="issue-main-title">{issue.title}</h2>
@@ -107,14 +111,16 @@ const IssueFullDetailsScreen = ({ variant = 'mobile' }) => {
                         <span>{issue.location}</span>
                     </div>
 
-                    <div className="mini-map-container" style={{ height: '150px', borderRadius: '12px', overflow: 'hidden', margin: '16px 0' }}>
-                        <GoogleMap
-                            center={{ lat: issue.coordinates[1], lng: issue.coordinates[0] }}
-                            zoom={15}
-                            markers={[{ position: { lat: issue.coordinates[1], lng: issue.coordinates[0] } }]}
-                            options={{ disableDefaultUI: true, zoomControl: false }}
-                        />
-                    </div>
+                    {issue.coordinates && issue.coordinates.length >= 2 && (
+                        <div className="mini-map-container" style={{ height: '150px', borderRadius: '12px', overflow: 'hidden', margin: '16px 0' }}>
+                            <GoogleMap
+                                center={{ lat: issue.coordinates[1], lng: issue.coordinates[0] }}
+                                zoom={15}
+                                markers={[{ position: { lat: issue.coordinates[1], lng: issue.coordinates[0] } }]}
+                                options={{ disableDefaultUI: true, zoomControl: false }}
+                            />
+                        </div>
+                    )}
 
                     <div className="issue-stats-details">
                         <div className="reported-date">Reported {issue.date}</div>
@@ -151,7 +157,7 @@ const IssueFullDetailsScreen = ({ variant = 'mobile' }) => {
                 <section className="timeline-section">
                     <h3>Progress Timeline</h3>
                     <div className="timeline-container">
-                        {issue.history.map((step, index) => (
+                        {(issue.history || []).map((step, index) => (
                             <div key={index} className={`timeline-step ${step.status}`}>
                                 <div className="step-indicator">
                                     <div className="step-line" />
@@ -171,9 +177,9 @@ const IssueFullDetailsScreen = ({ variant = 'mobile' }) => {
 
                 {/* 6. Comments Section */}
                 <section className="comments-section">
-                    <h3>Comments ({issue.comments.length})</h3>
+                    <h3>Comments ({(issue.comments || []).length})</h3>
                     <div className="comments-list">
-                        {issue.comments.map((comment) => (
+                        {(issue.comments || []).map((comment) => (
                             <div key={comment.id} className="comment-item">
                                 <img src={comment.avatar} alt={comment.name} className="comment-avatar" />
                                 <div className="comment-body">

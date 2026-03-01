@@ -28,7 +28,8 @@
 
 .official-dashboard-container {
     background-color: var(--od-bg-color);
-    height: 100vh;
+    height: 100%;
+    /* Fill parent frame — works in both desktop pane and mobile phone frame */
     width: 100%;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     color: var(--od-text-primary);

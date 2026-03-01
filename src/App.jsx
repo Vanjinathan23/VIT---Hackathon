@@ -1,5 +1,6 @@
 import './App.css';
 import useAppStore from './store/useAppStore';
+import useNotificationStore from './store/useNotificationStore';
 import DualViewLayout from './components/layout/DualViewLayout';
 import OnboardingScreen from './components/screens/OnboardingScreen';
 import RoleSelectionScreen from './components/screens/RoleSelectionScreen';
@@ -20,6 +21,7 @@ import MockLoginScreen from './components/screens/MockLoginScreen';
 import WorkerDashboardScreen from './components/screens/WorkerDashboardScreen';
 import OfficialDashboardScreen from './components/screens/OfficialDashboardScreen';
 import TaskSessionScreen from './components/screens/TaskSessionScreen';
+import NotificationScreen from './components/screens/NotificationScreen';
 import { useEffect } from 'react';
 
 function App() {
@@ -42,6 +44,16 @@ function App() {
 
   // Basic route protection mock
   const isAuthenticated = useAppStore(state => state.isAuthenticated);
+  const startPolling = useNotificationStore(state => state.startPolling);
+  const stopPolling = useNotificationStore(state => state.stopPolling);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      startPolling();
+    } else {
+      stopPolling();
+    }
+  }, [isAuthenticated, startPolling, stopPolling]);
 
   const renderContent = (variant) => {
     // Unprotected routes
@@ -92,6 +104,8 @@ function App() {
         return <OfficialLoginScreen variant={variant} />;
       case 'worker-login':
         return <WorkerLoginScreen variant={variant} />;
+      case 'notifications':
+        return <NotificationScreen variant={variant} />;
       default:
         return <MockLoginScreen variant={variant} />;
     }

@@ -1,5 +1,6 @@
 import React from 'react';
 import useAppStore from '../../store/useAppStore';
+import useNotificationStore from '../../store/useNotificationStore';
 import './ProfileScreen.css';
 
 /**
@@ -21,7 +22,9 @@ const ProfileScreen = ({ variant = 'mobile' }) => {
     const issues = useAppStore(state => state.issues);
     const drafts = useAppStore(state => state.drafts);
     const navigate = useAppStore(state => state.navigate);
+    const logout = useAppStore(state => state.logout);
     const currentRoute = useAppStore(state => state.currentRoute);
+    const unreadCount = useNotificationStore(state => state.unreadCount);
 
     // Derived Data
     const userIssues = issues.filter(issue => issue.userId === user.id);
@@ -150,14 +153,17 @@ const ProfileScreen = ({ variant = 'mobile' }) => {
                             </div>
                             <span className="material-symbols-outlined arrow">chevron_right</span>
                         </div>
-                        <div className="settings-item-row">
+                        <div className="settings-item-row" onClick={() => navigate('notifications')}>
                             <div className="settings-left">
-                                <span className="material-symbols-outlined">notifications</span>
+                                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                                    <span className="material-symbols-outlined">notifications</span>
+                                    {unreadCount > 0 && <span className="unread-badge-wd" style={{ top: -6, right: -6 }}>{unreadCount}</span>}
+                                </div>
                                 <span>Notifications</span>
                             </div>
                             <span className="material-symbols-outlined arrow">chevron_right</span>
                         </div>
-                        <div className="settings-item-row logout-row">
+                        <div className="settings-item-row logout-row" onClick={logout}>
                             <div className="settings-left logout-text">
                                 <span className="material-symbols-outlined">logout</span>
                                 <span>Logout</span>

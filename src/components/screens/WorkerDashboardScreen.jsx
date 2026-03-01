@@ -1,28 +1,30 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import useAppStore from '../../store/useAppStore';
+import useNotificationStore from '../../store/useNotificationStore';
 import './WorkerDashboardScreen.css';
 
-const TaskCard = ({ task, variant = 'home', onAction }) => {
+const TaskCard = ({ task, variant = 'home' }) => {
     const setWorkerDashboardTab = useAppStore(state => state.setWorkerDashboardTab);
     const setWorkerDashboardSubTab = useAppStore(state => state.setWorkerDashboardSubTab);
-    const updateWorkerTaskStatus = useAppStore(state => state.updateWorkerTaskStatus);
+    const workerStartTask = useAppStore(state => state.workerStartTask);
+    const workerCompleteTask = useAppStore(state => state.workerCompleteTask);
     const navigate = useAppStore(state => state.navigate);
     const setSelectedTaskSessionId = useAppStore(state => state.setSelectedTaskSessionId);
-
     const setTaskSessionViewMode = useAppStore(state => state.setTaskSessionViewMode);
+    const [loading, setLoading] = useState(false);
 
     const handleViewTask = () => {
-        if (variant === 'home') {
-            updateWorkerTaskStatus(task.id, 'Assigned');
-            setWorkerDashboardTab('TASKS');
-            setWorkerDashboardSubTab('Assigned');
-        }
+        // Home → navigate to tasks/assigned tab (no DB change)
+        setWorkerDashboardTab('TASKS');
+        setWorkerDashboardSubTab('assigned');
     };
 
-    const handleStartTask = () => {
-        setSelectedTaskSessionId(task.id);
-        setTaskSessionViewMode('full');
-        navigate('task-session');
+    const handleStartTask = async () => {
+        // From Assigned tab: assigned → in_progress via real API
+        setLoading(true);
+        await workerStartTask(task.id);
+        setWorkerDashboardSubTab('in_progress');
+        setLoading(false);
     };
 
     const handleDetails = () => {
@@ -31,43 +33,44 @@ const TaskCard = ({ task, variant = 'home', onAction }) => {
         navigate('task-session');
     };
 
-    const handleUpdateStatus = () => {
-        setSelectedTaskSessionId(task.id);
-        setTaskSessionViewMode('full');
-        navigate('task-session');
+    const handleMarkAsDone = async () => {
+        // in_progress → completed via real API
+        setLoading(true);
+        await workerCompleteTask(task.id, '');
+        setWorkerDashboardSubTab('completed');
+        setLoading(false);
     };
 
-    const handleMarkAsDone = () => {
-        updateWorkerTaskStatus(task.id, 'Completed');
-        // Switch to COMPLETED tab to show the task has moved
-        setWorkerDashboardSubTab('Completed');
-    };
+    // Normalise status for display
+    const statusIsInProgress = task.status === 'in_progress' || task.status === 'In Progress';
+    const statusIsAssigned = task.status === 'assigned' || task.status === 'Assigned';
+    const statusIsCompleted = task.status === 'completed' || task.status === 'Completed';
 
     return (
         <div className="mt-card animate-fade-in" style={{ marginBottom: variant === 'home' ? '0' : '16px' }}>
             <div className="mt-card-top">
-                <span className={`mt-tag ${task.priority === 'EMERGENCY' ? 'red' : 'orange'}`}>
-                    {task.priority}
+                <span className={`mt-tag ${task.priority === 'EMERGENCY' || task.priority === 'emergency' ? 'red' : 'orange'}`}>
+                    {task.priority || 'NORMAL'}
                 </span>
-                {task.status !== 'In Progress' && (
+                {!statusIsInProgress && !statusIsCompleted && task.sla && (
                     <div className="mt-sla">
-                        <div className={`mt-sla-time ${task.priority === 'EMERGENCY' ? 'red' : 'orange'}`}>
+                        <div className={`mt-sla-time ${task.priority === 'EMERGENCY' || task.priority === 'emergency' ? 'red' : 'orange'}`}>
                             <span className="material-symbols-outlined">alarm</span>
                             {task.sla}
                         </div>
                         <span className="mt-sla-label">SLA COUNTDOWN</span>
                     </div>
                 )}
-                {task.status === 'In Progress' && (
+                {statusIsInProgress && (
                     <span className="wd-pill">IN PROGRESS</span>
                 )}
-                {task.status === 'Completed' && (
+                {statusIsCompleted && (
                     <span className="wd-pill" style={{ backgroundColor: '#10b981', color: 'white' }}>COMPLETED</span>
                 )}
             </div>
             <h2 className="mt-id">{task.id}</h2>
             <div className="mt-category-row">
-                <span className="material-symbols-outlined mt-category-icon">{task.icon}</span>
+                <span className="material-symbols-outlined mt-category-icon">{task.icon || 'build'}</span>
                 {task.category}
             </div>
             <p className="mt-desc">{task.description}</p>
@@ -84,11 +87,17 @@ const TaskCard = ({ task, variant = 'home', onAction }) => {
                 ) : (
                     <>
                         <button className="mt-btn outline" onClick={handleDetails}>Details</button>
-                        {task.status === 'Assigned' ? (
-                            <button className="mt-btn solid" onClick={handleStartTask}>Start Task</button>
-                        ) : task.status === 'In Progress' ? (
-                            <button className="mt-btn solid" style={{ backgroundColor: '#10b981', borderColor: '#10b981' }} onClick={handleMarkAsDone}>Mark as Done</button>
-                        ) : (
+                        {statusIsAssigned && (
+                            <button className="mt-btn solid" onClick={handleStartTask} disabled={loading}>
+                                {loading ? 'Starting...' : 'Start Task'}
+                            </button>
+                        )}
+                        {statusIsInProgress && (
+                            <button className="mt-btn solid" style={{ backgroundColor: '#10b981', borderColor: '#10b981' }} onClick={handleMarkAsDone} disabled={loading}>
+                                {loading ? 'Saving...' : 'Mark as Done'}
+                            </button>
+                        )}
+                        {statusIsCompleted && (
                             <button className="mt-btn solid" style={{ backgroundColor: '#64748b', borderColor: '#64748b', opacity: 0.8 }} disabled>Completed</button>
                         )}
                     </>
@@ -100,6 +109,12 @@ const TaskCard = ({ task, variant = 'home', onAction }) => {
 
 const DashboardHome = ({ userName }) => {
     const workerTasks = useAppStore(state => state.workerTasks);
+    const workerCompletedTasks = useAppStore(state => state.workerCompletedTasks || []);
+
+    const assignedCount = workerTasks.filter(t => t.status === 'assigned').length;
+    const inProgressCount = workerTasks.filter(t => t.status === 'in_progress').length;
+    const completedCount = workerCompletedTasks.length;
+
     return (
         <div className="wd-content-wrapper animate-fade-in">
             <header className="wd-header">
@@ -117,7 +132,7 @@ const DashboardHome = ({ userName }) => {
             </header>
 
             <main>
-                {/* Today's Overview */}
+                {/* Today's Overview — driven by real DB data */}
                 <section className="wd-section">
                     <h2 className="wd-section-title">
                         <span className="material-symbols-outlined wd-section-icon">analytics</span>
@@ -128,22 +143,21 @@ const DashboardHome = ({ userName }) => {
                             <div className="wd-icon-box blue">
                                 <span className="material-symbols-outlined">assignment</span>
                             </div>
-                            <div className="wd-card-number">12</div>
-                            <div className="wd-card-label">ASSIGNED TODAY</div>
+                            <div className="wd-card-number">{assignedCount}</div>
+                            <div className="wd-card-label">ASSIGNED</div>
                         </div>
                         <div className="wd-card wd-card-compact">
                             <div className="wd-icon-box orange">
                                 <span className="material-symbols-outlined">pending_actions</span>
                             </div>
-                            <div className="wd-card-number">4</div>
+                            <div className="wd-card-number">{inProgressCount}</div>
                             <div className="wd-card-label">IN PROGRESS</div>
                         </div>
-                        {/* Placeholder for exactly matching the third partially hidden card in the image */}
-                        <div className="wd-card wd-card-compact" style={{ opacity: 0.5 }}>
-                            <div className="wd-icon-box" style={{ backgroundColor: '#f1f5f9', color: '#64748b' }}>
+                        <div className="wd-card wd-card-compact">
+                            <div className="wd-icon-box" style={{ backgroundColor: '#dcfce7', color: '#16a34a' }}>
                                 <span className="material-symbols-outlined">check_circle</span>
                             </div>
-                            <div className="wd-card-number">8</div>
+                            <div className="wd-card-number">{completedCount}</div>
                             <div className="wd-card-label">COMPLETED</div>
                         </div>
                     </div>
@@ -179,9 +193,15 @@ const DashboardHome = ({ userName }) => {
                         </button>
                     </div>
                     <div className="wd-task-list">
-                        {workerTasks.filter(t => t.status === 'Pending Assignment').slice(0, 3).map(task => (
+                        {workerTasks.filter(t => t.status === 'assigned' || t.status === 'in_progress').slice(0, 3).map(task => (
                             <TaskCard key={task.id} task={task} variant="home" />
                         ))}
+                        {workerTasks.filter(t => t.status === 'assigned' || t.status === 'in_progress').length === 0 && (
+                            <div style={{ textAlign: 'center', padding: '32px 0', color: '#94a3b8' }}>
+                                <span className="material-symbols-outlined" style={{ fontSize: 40, display: 'block', marginBottom: 8 }}>task_alt</span>
+                                No active tasks assigned to you.
+                            </div>
+                        )}
                     </div>
                 </section>
             </main>
@@ -420,6 +440,9 @@ const InProgressContent = ({ onViewDetails }) => {
         return <UpdateStatusView taskId="#CS-1024" onBack={() => setShowUpdateStatus(false)} />;
     }
 
+    const unreadCount = useNotificationStore(state => state.unreadCount);
+    const navigate = useAppStore(state => state.navigate);
+
     return (
         <div className="ip-container animate-fade-in">
             <div className="ip-header">
@@ -428,9 +451,9 @@ const InProgressContent = ({ onViewDetails }) => {
                     <p className="ip-subtitle">Tasks you are currently working on</p>
                 </div>
                 <div className="ip-header-actions">
-                    <button className="ip-bell-btn">
+                    <button className="ip-bell-btn" onClick={() => navigate('notifications')} style={{ position: 'relative' }}>
                         <span className="material-symbols-outlined">notifications</span>
-                        <span className="ip-bell-dot"></span>
+                        {unreadCount > 0 && <span className="unread-badge-wd">{unreadCount}</span>}
                     </button>
                 </div>
             </div>
@@ -590,16 +613,30 @@ const CompletedContent = () => (
 
 const MyTasksView = () => {
     const workerTasks = useAppStore(state => state.workerTasks);
+    const workerCompletedTasks = useAppStore(state => state.workerCompletedTasks || []);
     const activeSubTab = useAppStore(state => state.workerDashboardSubTab);
     const setActiveSubTab = useAppStore(state => state.setWorkerDashboardSubTab);
     const selectedTaskId = useAppStore(state => state.selectedWorkerTaskId);
     const setSelectedTaskId = useAppStore(state => state.setSelectedWorkerTaskId);
 
+    // DB-status-aware filtering
+    const assignedTasks = workerTasks.filter(t => t.status === 'assigned');
+    const inProgressTasks = workerTasks.filter(t => t.status === 'in_progress');
+    // completed tasks come from workerCompletedTasks
+    const completedTasks = workerCompletedTasks;
+
     const getHeaderTitle = () => {
-        const count = workerTasks.filter(t => t.status === activeSubTab).length;
-        if (activeSubTab === 'In Progress') return `In Progress Tasks (${count})`;
-        if (activeSubTab === 'Completed') return `Completed Today (${count})`;
-        return `My Tasks`;
+        if (activeSubTab === 'assigned') return `Assigned Tasks (${assignedTasks.length})`;
+        if (activeSubTab === 'in_progress') return `In Progress (${inProgressTasks.length})`;
+        if (activeSubTab === 'completed') return `Completed Today (${completedTasks.length})`;
+        return 'My Tasks';
+    };
+
+    const getActiveTasks = () => {
+        if (activeSubTab === 'assigned') return assignedTasks;
+        if (activeSubTab === 'in_progress') return inProgressTasks;
+        if (activeSubTab === 'completed') return completedTasks;
+        return [];
     };
 
     if (selectedTaskId) {
@@ -615,48 +652,48 @@ const MyTasksView = () => {
                 <h1 className="mt-title">{getHeaderTitle()}</h1>
                 <button className="mt-icon-btn" style={{ color: '#475569' }}>
                     <span className="material-symbols-outlined" style={{ fontSize: 24 }}>
-                        {activeSubTab === 'Completed' ? 'calendar_month' : 'tune'}
+                        {activeSubTab === 'completed' ? 'calendar_month' : 'tune'}
                     </span>
                 </button>
             </div>
 
             <div className="mt-tabs-container">
                 <button
-                    className={`mt-tab ${activeSubTab === 'Assigned' ? 'active' : ''}`}
-                    onClick={() => setActiveSubTab('Assigned')}
+                    className={`mt-tab ${activeSubTab === 'assigned' ? 'active' : ''}`}
+                    onClick={() => setActiveSubTab('assigned')}
                 >
-                    Assigned ({workerTasks.filter(t => t.status === 'Assigned').length})
+                    Assigned ({assignedTasks.length})
                 </button>
                 <button
-                    className={`mt-tab ${activeSubTab === 'In Progress' ? 'active' : ''}`}
-                    onClick={() => setActiveSubTab('In Progress')}
+                    className={`mt-tab ${activeSubTab === 'in_progress' ? 'active' : ''}`}
+                    onClick={() => setActiveSubTab('in_progress')}
                 >
-                    In Progress ({workerTasks.filter(t => t.status === 'In Progress').length})
+                    In Progress ({inProgressTasks.length})
                 </button>
                 <button
-                    className={`mt-tab ${activeSubTab === 'Completed' ? 'active' : ''}`}
-                    onClick={() => setActiveSubTab('Completed')}
+                    className={`mt-tab ${activeSubTab === 'completed' ? 'active' : ''}`}
+                    onClick={() => setActiveSubTab('completed')}
                 >
-                    Completed ({workerTasks.filter(t => t.status === 'Completed').length})
+                    Completed ({completedTasks.length})
                 </button>
             </div>
 
             <div className="mt-list">
-                {workerTasks.filter(t => t.status === activeSubTab).length > 0 ? (
-                    workerTasks.filter(t => t.status === activeSubTab).map(task => (
+                {getActiveTasks().length > 0 ? (
+                    getActiveTasks().map(task => (
                         <TaskCard key={task.id} task={task} variant="tasks" />
                     ))
                 ) : (
                     <div className="mt-empty-state" style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
                         <span className="material-symbols-outlined" style={{ fontSize: 48, marginBottom: 12 }}>
-                            {activeSubTab === 'Completed' ? 'task_alt' : 'assignment_late'}
+                            {activeSubTab === 'completed' ? 'task_alt' : 'assignment_late'}
                         </span>
-                        <p>No {activeSubTab.toLowerCase().replace('_', ' ')} tasks.</p>
+                        <p>No {activeSubTab.replace('_', ' ')} tasks.</p>
                     </div>
                 )}
             </div>
 
-            {activeSubTab !== 'In Progress' && activeSubTab !== 'Completed' && (
+            {activeSubTab === 'assigned' && (
                 <div className="mt-map-preview">
                     <button className="mt-map-btn">
                         <span className="material-symbols-outlined">map</span>
@@ -669,6 +706,9 @@ const MyTasksView = () => {
 };
 
 const WorkerPerformanceView = () => {
+    const navigate = useAppStore(state => state.navigate);
+    const unreadCount = useNotificationStore(state => state.unreadCount);
+
     return (
         <div className="perf-container animate-fade-in">
             {/* Header */}
@@ -677,8 +717,9 @@ const WorkerPerformanceView = () => {
                     <img src="https://i.pravatar.cc/150?img=11" alt="Profile" />
                 </div>
                 <h1 className="perf-title">My Performance</h1>
-                <button className="perf-bell-btn">
+                <button className="perf-bell-btn" onClick={() => navigate('notifications')} style={{ position: 'relative' }}>
                     <span className="material-symbols-outlined">notifications</span>
+                    {unreadCount > 0 && <span className="unread-badge-wd">{unreadCount}</span>}
                 </button>
             </div>
 
@@ -883,6 +924,8 @@ const WorkerProfileView = () => {
     const setWorkerDashboardTab = useAppStore(state => state.setWorkerDashboardTab);
     const currentUser = useAppStore(state => state.currentUser);
     const updateUser = useAppStore(state => state.updateUser);
+    const navigate = useAppStore(state => state.navigate);
+    const unreadCount = useNotificationStore(state => state.unreadCount);
 
     const [workerStatus, setWorkerStatus] = useState('Available'); // 'Available', 'Busy', 'Offline'
     const [isEditing, setIsEditing] = useState(false);
@@ -942,9 +985,9 @@ const WorkerProfileView = () => {
                     <span className="material-symbols-outlined">arrow_back</span>
                 </button>
                 <h1 className="prof-title">My Profile</h1>
-                <button className="prof-bell-btn">
+                <button className="prof-bell-btn" onClick={() => navigate('notifications')} style={{ position: 'relative' }}>
                     <span className="material-symbols-outlined">notifications</span>
-                    <span className="prof-bell-dot"></span>
+                    {unreadCount > 0 && <span className="unread-badge-wd">{unreadCount}</span>}
                 </button>
             </div>
 
@@ -1099,6 +1142,12 @@ const WorkerDashboardScreen = ({ variant = 'mobile' }) => {
     const logout = useAppStore(state => state.logout);
     const setWorkerDashboardTab = useAppStore(state => state.setWorkerDashboardTab);
     const activeTab = useAppStore(state => state.workerDashboardTab);
+    const fetchAppData = useAppStore(state => state.fetchAppData);
+
+    // Load worker tasks from DB on mount
+    useEffect(() => {
+        fetchAppData();
+    }, []);
 
     const userName = user?.name ? user.name.split(' ')[0] : 'Ravi';
 

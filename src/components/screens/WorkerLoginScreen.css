@@ -3,7 +3,8 @@
 .login-root {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    min-height: 100%;
+    /* Fill parent frame, not full viewport */
     padding: 20px;
     background-color: #f6f6f8;
     color: #1a1e2e;

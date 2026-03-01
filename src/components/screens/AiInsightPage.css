@@ -43,7 +43,8 @@
     font-size: 18px;
     font-weight: 700;
     color: #1e293b;
-    margin-right: 40px; /* Offset for back button */
+    margin-right: 40px;
+    /* Offset for back button */
 }
 
 /* --- Main Content --- */
@@ -190,9 +191,20 @@
     font-weight: 700;
 }
 
-.sev-high { background: #fee2e2; color: #dc2626; }
-.sev-medium { background: #fef3c7; color: #d97706; }
-.sev-low { background: #dcfce7; color: #16a34a; }
+.sev-high {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.sev-medium {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.sev-low {
+    background: #dcfce7;
+    color: #16a34a;
+}
 
 /* --- Reasoning Bubble --- */
 .ai-mobile-reasoning {
@@ -250,7 +262,9 @@
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* --- Mobile Bottom Nav Fix --- */
@@ -402,7 +416,8 @@
 
 /* Natural Scroll Rule Verification */
 .ai-page-root {
-    min-height: 100vh;
+    min-height: 100%;
+    /* Fill parent frame — not full viewport */
 }
 
 .ai-page-content {

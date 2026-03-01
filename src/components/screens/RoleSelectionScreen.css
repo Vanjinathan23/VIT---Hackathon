@@ -1,7 +1,8 @@
 .role-selection-root {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    min-height: 100%;
+    /* Fill parent frame */
     padding: 20px;
     background-color: #f8fbff;
     /* Very light blue/off-white */

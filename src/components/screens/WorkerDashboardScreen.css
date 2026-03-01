@@ -28,8 +28,8 @@
 
 .worker-dashboard-container {
   background-color: var(--wd-bg-color);
-  height: 100vh;
-  /* Fixed height for the container */
+  height: 100%;
+  /* Fill parent frame — works in both desktop pane and mobile phone frame */
   width: 100%;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   color: var(--wd-text-primary);
@@ -37,7 +37,6 @@
   flex-direction: column;
   position: relative;
   overflow: hidden;
-  /* Prevent body scroll, use internal scroll */
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -914,6 +913,23 @@
   background-color: var(--wd-red);
   border: 2px solid white;
   border-radius: 50%;
+}
+
+.unread-badge-wd {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background-color: var(--wd-red, #ef4444);
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 2px white;
 }
 
 .ip-task-card {

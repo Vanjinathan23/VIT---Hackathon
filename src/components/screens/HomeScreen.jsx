@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import useAppStore from '../../store/useAppStore';
+import { api } from '../../services/api';
+import useNotificationStore from '../../store/useNotificationStore';
 import AiInsightPanel from './AiInsightPanel';
 import './HomeScreen.css';
 
@@ -20,6 +22,13 @@ const HomeScreen = ({ variant = 'mobile' }) => {
     const setSelectedIssueId = useAppStore(state => state.setSelectedIssueId);
     const currentAiIssueId = useAppStore(state => state.currentAiIssueId);
     const setAiIssueId = useAppStore(state => state.setAiIssueId);
+    const fetchAppData = useAppStore(state => state.fetchAppData);
+    const unreadCount = useNotificationStore(state => state.unreadCount);
+
+    // Load complaints from DB on mount
+    useEffect(() => {
+        fetchAppData();
+    }, []);
 
     // Header Component
     const Header = () => (
@@ -27,8 +36,9 @@ const HomeScreen = ({ variant = 'mobile' }) => {
             <div className="home-logo">CivicStream</div>
 
             <div className="home-header-icons">
-                <div className="icon-btn">
+                <div className="icon-btn" style={{ position: 'relative' }} onClick={() => navigate('notifications')}>
                     <span className="material-symbols-outlined" style={{ fontSize: 26 }}>notifications</span>
+                    {unreadCount > 0 && <span className="unread-badge">{unreadCount}</span>}
                 </div>
             </div>
         </header>
@@ -229,8 +239,9 @@ const HomeScreen = ({ variant = 'mobile' }) => {
             <div className="nav-plus-btn" onClick={() => { setAiIssueId(null); navigate('report-issue'); }}>
                 <span className="material-symbols-outlined" style={{ fontSize: 30 }}>add</span>
             </div>
-            <div className="nav-item">
-                <span className="material-symbols-outlined" style={{ fontSize: 30 }}>notifications</span>
+            <div className={`nav-item ${currentRoute === 'notifications' ? 'active' : ''}`} onClick={() => navigate('notifications')} style={{ position: 'relative' }}>
+                <span className="material-symbols-outlined" style={{ fontSize: 30, fontVariationSettings: currentRoute === 'notifications' ? "'FILL' 1" : "''" }}>notifications</span>
+                {unreadCount > 0 && <span className="unread-badge mobile">{unreadCount}</span>}
             </div>
             <div className={`nav-item ${currentRoute === 'profile' ? 'active' : ''}`} onClick={() => navigate('profile')}>
                 <span className="material-symbols-outlined" style={{ fontSize: 30, fontVariationSettings: currentRoute === 'profile' ? "'FILL' 1" : "''" }}>person</span>
@@ -254,9 +265,10 @@ const HomeScreen = ({ variant = 'mobile' }) => {
                     <span className="material-symbols-outlined">map</span>
                     <span>Map View</span>
                 </div>
-                <div className="sidebar-item">
+                <div className={`sidebar-item ${currentRoute === 'notifications' ? 'active' : ''}`} onClick={() => navigate('notifications')}>
                     <span className="material-symbols-outlined">notifications</span>
-                    <span>Notifications</span>
+                    <span style={{ flex: 1 }}>Notifications</span>
+                    {unreadCount > 0 && <span className="unread-badge count">{unreadCount}</span>}
                 </div>
                 <div className={`sidebar-item ${currentRoute === 'report-issue' ? 'active' : ''}`} onClick={() => navigate('report-issue')}>
                     <span className="material-symbols-outlined">add_box</span>
@@ -276,14 +288,13 @@ const HomeScreen = ({ variant = 'mobile' }) => {
     const SuggestedFriends = () => {
         const switchCitizenAccount = useAppStore(state => state.switchCitizenAccount);
         const myCitizenAccounts = useAppStore(state => state.myCitizenAccounts) || [];
+        const [availableAccounts, setAvailableAccounts] = React.useState([]);
 
-        const availableAccounts = [
-            { id: 'user_456', name: 'Sarah Civic', username: 'sarah_civic', img: 'https://i.pravatar.cc/150?u=sarah' },
-            { id: 'user_789', name: 'Mike Chennai', username: 'mike_chennai', img: 'https://i.pravatar.cc/150?u=mike' },
-            { id: 'user_101', name: 'Green Activist', username: 'green_activist', img: 'https://i.pravatar.cc/150?u=green' },
-            { id: 'user_202', name: 'TN Commuter', username: 'tn_commuter', img: 'https://i.pravatar.cc/150?u=tn' },
-            { id: 'user_303', name: 'Urban Planner', username: 'urban_planner', img: 'https://i.pravatar.cc/150?u=planner' }
-        ];
+        React.useEffect(() => {
+            api.fetchCitizenAccounts().then(accounts => {
+                if (accounts) setAvailableAccounts(accounts);
+            });
+        }, []);
 
         return (
             <div className="home-right-sidebar animate-fade-in" style={{ padding: '0 0 0 0' }}>
@@ -352,13 +363,15 @@ const HomeScreen = ({ variant = 'mobile' }) => {
     // Stories Bar Component
     const StoriesBar = () => {
         const stories = useAppStore(state => state.stories);
+        const currentUserProfileImage = useAppStore(state => state.user?.profileImage);
+
         return (
             <div className="stories-container scrollbar-hide">
                 {stories.map(story => (
                     <div key={story.id} className="story-item">
                         <div className={`story-ring ${story.isUser ? 'user-story' : ''}`}>
-                            {story.image ? (
-                                <div className="story-image" style={{ backgroundImage: `url(${story.image})` }} />
+                            {story.image || (story.isUser && currentUserProfileImage) ? (
+                                <div className="story-image" style={{ backgroundImage: `url(${story.isUser && currentUserProfileImage ? currentUserProfileImage : story.image})` }} />
                             ) : (
                                 <div className="story-placeholder">
                                     <span className="material-symbols-outlined" style={{ fontSize: 32 }}>{story.icon}</span>

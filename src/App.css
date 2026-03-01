@@ -154,3 +154,20 @@ body {
   background: #e2e8f0;
   border-radius: 99px;
 }
+
+.unread-badge-wd {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background-color: var(--wd-red, #ef4444);
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 2px white;
+}

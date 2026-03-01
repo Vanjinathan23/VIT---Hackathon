@@ -17,6 +17,7 @@ const ReportIssueScreen = ({ variant = 'mobile' }) => {
     const navigate = useAppStore(state => state.navigate);
     const addIssue = useAppStore(state => state.addIssue);
     const addDraft = useAppStore(state => state.addDraft);
+    const currentUser = useAppStore(state => state.currentUser);
 
     // Local State
     const [priority, setPriority] = useState('Medium');

@@ -39,17 +39,19 @@ const IssueDetailScreen = ({ variant = 'mobile' }) => {
     const filteredIssues = useMemo(() => {
         return issues.filter(issue => {
             if (mapFilter === 'All') return true;
-            return issue.status === mapFilter;
+            if (mapFilter === 'in_progress') return issue.status === 'assigned' || issue.status === 'in_progress' || issue.status === 'Processing';
+            if (mapFilter === 'completed') return issue.status === 'completed' || issue.status === 'verified' || issue.status === 'Verified';
+            return issue.status === mapFilter || issue.status === 'Pending';
         });
     }, [issues, mapFilter]);
 
     const markers = useMemo(() => {
-        return filteredIssues.map(issue => ({
+        return filteredIssues.filter(i => i.coordinates && i.coordinates.length >= 2).map(issue => ({
             position: { lat: issue.coordinates[1], lng: issue.coordinates[0] },
             id: issue.id,
             icon: {
-                url: issue.status === 'Pending' ? 'http://maps.google.com/mapfiles/ms/icons/red-dot.png' :
-                    issue.status === 'Processing' ? 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png' :
+                url: (issue.status === 'pending' || issue.status === 'Pending') ? 'http://maps.google.com/mapfiles/ms/icons/red-dot.png' :
+                    (issue.status === 'assigned' || issue.status === 'in_progress' || issue.status === 'Processing') ? 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png' :
                         'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
             }
         }));
@@ -80,10 +82,14 @@ const IssueDetailScreen = ({ variant = 'mobile' }) => {
     const handleBack = () => navigate('home');
 
     const getStatusInfo = (status) => {
-        switch (status) {
-            case 'Pending': return { color: '#fef3c7', text: '#d97706', label: 'Pending' };
-            case 'Processing': return { color: '#dbeafe', text: '#2563eb', label: 'Processing' };
-            case 'Verified': return { color: '#dcfce7', text: '#16a34a', label: 'Verified' };
+        const s = (status || '').toLowerCase();
+        switch (s) {
+            case 'pending': return { color: '#fef3c7', text: '#d97706', label: 'Pending' };
+            case 'assigned':
+            case 'in_progress':
+            case 'processing': return { color: '#dbeafe', text: '#2563eb', label: 'In Progress' };
+            case 'completed':
+            case 'verified': return { color: '#dcfce7', text: '#16a34a', label: 'Verified' };
             default: return { color: '#f3f4f6', text: '#374151', label: 'Unknown' };
         }
     };
@@ -91,7 +97,7 @@ const IssueDetailScreen = ({ variant = 'mobile' }) => {
     const statusStyle = selectedIssue ? getStatusInfo(selectedIssue.status) : null;
 
     const center = useMemo(() => {
-        if (selectedIssue) {
+        if (selectedIssue && selectedIssue.coordinates && selectedIssue.coordinates.length >= 2) {
             return { lat: selectedIssue.coordinates[1], lng: selectedIssue.coordinates[0] };
         }
         return { lat: 13.0850, lng: 80.2201 };
@@ -118,16 +124,16 @@ const IssueDetailScreen = ({ variant = 'mobile' }) => {
                         onClick={() => setMapFilter('All')}
                     >All</div>
                     <div
-                        className={`filter-chip chip-pending ${mapFilter === 'Pending' ? 'active' : ''}`}
-                        onClick={() => setMapFilter('Pending')}
+                        className={`filter-chip chip-pending ${mapFilter === 'pending' ? 'active' : ''}`}
+                        onClick={() => setMapFilter('pending')}
                     ><div className="chip-dot" /> Pending</div>
                     <div
-                        className={`filter-chip chip-processing ${mapFilter === 'Processing' ? 'active' : ''}`}
-                        onClick={() => setMapFilter('Processing')}
+                        className={`filter-chip chip-processing ${mapFilter === 'in_progress' ? 'active' : ''}`}
+                        onClick={() => setMapFilter('in_progress')}
                     ><div className="chip-dot" /> In Progress</div>
                     <div
-                        className={`filter-chip chip-verified ${mapFilter === 'Verified' ? 'active' : ''}`}
-                        onClick={() => setMapFilter('Verified')}
+                        className={`filter-chip chip-verified ${mapFilter === 'completed' ? 'active' : ''}`}
+                        onClick={() => setMapFilter('completed')}
                     ><div className="chip-dot" /> Resolved</div>
                 </div>
 
@@ -152,7 +158,7 @@ const IssueDetailScreen = ({ variant = 'mobile' }) => {
 
                     <div className="sheet-content">
                         <div className="sheet-header">
-                            <span className="issue-category-badge">{selectedIssue.category.toUpperCase()}</span>
+                            <span className="issue-category-badge">{(selectedIssue.category || 'General').toUpperCase()}</span>
                             <div className="status-badge-mini" style={{ backgroundColor: statusStyle.color, color: statusStyle.text }}>
                                 <div className="dot" style={{ backgroundColor: statusStyle.text }} /> {statusStyle.label}
                             </div>
@@ -175,14 +181,14 @@ const IssueDetailScreen = ({ variant = 'mobile' }) => {
                                 {/* Interaction Options (Above Options) */}
                                 <div className="sheet-interaction-row">
                                     <div className="interaction-left">
-                                        <button 
+                                        <button
                                             className={`interact-btn ${selectedIssue.userVote === 'up' ? 'active-up' : ''}`}
                                             onClick={() => useAppStore.getState().voteIssue(selectedIssue.id, 'up')}
                                         >
                                             <span className="material-symbols-outlined" style={{ fontVariationSettings: selectedIssue.userVote === 'up' ? "'FILL' 1" : "''" }}>thumb_up</span>
                                             <span>{selectedIssue.supportCount || 0}</span>
                                         </button>
-                                        <button 
+                                        <button
                                             className={`interact-btn ${selectedIssue.userVote === 'down' ? 'active-down' : ''}`}
                                             onClick={() => useAppStore.getState().voteIssue(selectedIssue.id, 'down')}
                                         >
