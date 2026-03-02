@@ -5,6 +5,7 @@
 
 [build.environment]
   NODE_VERSION = "20"
+  SECRETS_SCAN_OMIT_KEYS = "VITE_GOOGLE_MAPS_API_KEY,VITE_WEATHER_API_KEY,VITE_GEMINI_API_KEY"
 
 # Route all /api/* requests to the Express serverless function
 [[redirects]]
