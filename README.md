@@ -1,6 +1,6 @@
 CivicStream - https://hackoglitch-civic.netlify.app/
 
-![https://github.com/Vanjinathan23/VIT---Hackathon/blob/master/Screenshot%202026-03-06%20133939.png]()
+![Citizen Home Page](https://github.com/Vanjinathan23/VIT---Hackathon/blob/master/Screenshot%202026-03-06%20133939.png)
 
 
 # CivicStream — Digital Governance Platform
