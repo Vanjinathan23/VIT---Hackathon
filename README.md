@@ -1,5 +1,8 @@
 CivicStream - https://hackoglitch-civic.netlify.app/
 
+![Uploading image.png…]()
+
+
 # CivicStream — Digital Governance Platform
 
 A high-performance, real-time platform designed to bridge the gap between citizens and city infrastructure management. This project features a unique **Dual-View Development Layout** that allows developers to see and test Desktop (70% width) and Mobile (30% width) experiences simultaneously in a single view.
